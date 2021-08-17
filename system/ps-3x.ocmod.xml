@@ -1,0 +1,246 @@
+<modification>
+     <id>esmsgatewaycom@gmail.com-PS</id>
+    <name>PRODUCT STICKER®</name>
+    <version>1.0</version>
+    <author>esmsgatewaycom@gmail.com</author>
+    <code>esmsgatewaycom@gmail.com-PS</code>
+    <file path="admin/controller/common/column_left.php">
+      <operation error="skip">
+          <search><![CDATA[$this->load->language('common/column_left');]]></search>
+          <add position="after"><![CDATA[
+            $this->load->language('extension/sticker');
+            ]]>
+          </add>
+      </operation>
+      <operation error="skip">
+          <search><![CDATA[if ($this->user->hasPermission('access', 'catalog/recurring')) {]]></search>
+          <add position="before"><![CDATA[
+            // Sticker
+      			if ($this->user->hasPermission('access', 'extension/sticker')) {
+      				$catalog[] = array(
+      					'name'	   => $this->language->get('text_upsproduct'),
+      					'href'     => $this->url->link('extension/sticker', 'user_token=' . $this->session->data['user_token'], true),
+      					'children' => array()
+      				);
+      			}
+          ]]>
+          </add>
+      </operation>
+    </file>
+    <file path="admin/model/catalog/product.php">
+        <operation error="skip">
+            <search index="1"><![CDATA[$this->db->query("DELETE FROM " . DB_PREFIX . "url_alias WHERE query = 'product_id=" . (int)$product_id . "'");]]></search>
+            <add position="after"><![CDATA[//UPS
+                $this->db->query("DELETE FROM " . DB_PREFIX . "sticker WHERE product_id = 'product_id=" . (int)$product_id . "'");
+                ]]>
+            </add>
+        </operation>
+    </file>
+    <file path="catalog/controller/extension/module/featured.php">
+        <operation error="skip">
+            <search><![CDATA[$this->load->model('tool/image');]]></search>
+            <add position="after"><![CDATA[
+                //UPS
+                $this->load->model('extension/sticker');
+                $this->load->model('setting/setting');
+                $stickersetting = $this->model_setting_setting->getSetting('module_sticker', $this->config->get('config_store_id'));
+                $stickerstat = $stickersetting['module_sticker_status'];
+                $stickerproc = $stickersetting['module_sticker_productexpros'];
+                $stickercache = $stickersetting['module_sticker_cache'];
+                //END
+                ]]>
+            </add>
+        </operation>
+
+        <operation error="skip">
+            <search><![CDATA[$image = $this->model_tool_image->resize($product_info['image'], $setting['width'], $setting['height']);]]></search>
+            <add position="replace"><![CDATA[
+                //UPS
+                if ($stickerstat) {
+                    $sticker = $this->model_extension_sticker->getSticker($product_id);
+                    if (!empty($sticker)) {
+                          $resImage = new Sticker($product_info['image'], $sticker,  $setting['width'], $setting['height'], $this->config->get('config_store_id'));
+                          $resImage->setScale($stickerproc);
+                          $resImage->setCacheImage($stickercache);
+                          $image = ($this->request->server['HTTPS'] ? $this->config->get('config_ssl') : $this->config->get('config_url')) . $resImage->merge();
+                    } else {
+                        $image = $this->model_tool_image->resize($product_info['image'], $setting['width'], $setting['height']);
+                    }
+                } else {
+                    $image = $this->model_tool_image->resize($product_info['image'], $setting['width'], $setting['height']);
+
+                }
+                //END
+                ]]>
+            </add>
+        </operation>
+    </file>
+    <file path="catalog/controller/extension/module/{bestseller,latest,special}.php">
+        <operation error="skip">
+            <search><![CDATA[$this->load->model('catalog/product');]]></search>
+            <add position="after"><![CDATA[
+                //UPS
+                $this->load->model('extension/sticker');
+                $this->load->model('setting/setting');
+                $stickersetting = $this->model_setting_setting->getSetting('module_sticker', $this->config->get('config_store_id'));
+                $stickerstat = $stickersetting['module_sticker_status'];
+                $stickerproc = $stickersetting['module_sticker_productexpros'];
+                $stickercache = $stickersetting['module_sticker_cache'];
+
+                //END
+                ]]>
+            </add>
+        </operation>
+
+        <operation error="skip">
+            <search><![CDATA[$image = $this->model_tool_image->resize($result['image'], $setting['width'], $setting['height']);]]></search>
+            <add position="replace"><![CDATA[
+                //UPS
+                if ($stickerstat) {
+                    $sticker = $this->model_extension_sticker->getSticker($result['product_id']);
+                    if (!empty($sticker)) {
+                      $resImage = new Sticker($result['image'], $sticker,  $setting['width'], $setting['height'], $this->config->get('config_store_id'));
+                      $resImage->setScale($stickerproc);
+                      $resImage->setCacheImage($stickercache);
+                      $image = ($this->request->server['HTTPS'] ? $this->config->get('config_ssl') : $this->config->get('config_url')) . $resImage->merge();
+                    } else {
+                        $image = $this->model_tool_image->resize($result['image'], $setting['width'], $setting['height']);
+                    }
+                } else {
+                    $image = $this->model_tool_image->resize($result['image'], $setting['width'], $setting['height']);
+                }
+                //END
+                ]]>
+            </add>
+        </operation>
+    </file>
+    <file path="catalog/controller/product/{search,category,special,manufacturer}.php">
+        <operation error="skip">
+            <search><![CDATA[$data['products'] = array();]]></search>
+            <add position="after"><![CDATA[
+                //UPS
+                $this->load->model('extension/sticker');
+                $this->load->model('setting/setting');
+                $stickersetting = $this->model_setting_setting->getSetting('module_sticker', $this->config->get('config_store_id'));
+                $stickerstat = $stickersetting['module_sticker_status'];
+                $stickerproc = $stickersetting['module_sticker_productexpros'];
+                $stickercache = $stickersetting['module_sticker_cache'];
+                //END
+                ]]>
+            </add>
+        </operation>
+
+        <operation error="skip">
+            <search><![CDATA[$image = $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_height'));]]></search>
+            <add position="replace"><![CDATA[
+              //UPS
+              if ($stickerstat) {
+                  $sticker = $this->model_extension_sticker->getSticker($result['product_id']);
+                  if (!empty($sticker)) {
+                    $resImage = new Sticker($result['image'], $sticker,  $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_height'), $this->config->get('config_store_id'));
+                    $resImage->setScale($stickerproc);
+                    $resImage->setCacheImage($stickercache);
+                    $image = $resImage->merge();
+                  } else {
+                    $image = $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_height'));
+                  }
+              } else {
+                  $image = $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_height'));
+              }
+
+                        //END
+                ]]>
+            </add>
+        </operation>
+    </file>
+<file path="catalog/controller/product/product.php">
+        <operation error="skip">
+            <search><![CDATA[$this->load->model('tool/image');]]></search>
+            <add position="after"><![CDATA[
+                //UPS
+                $this->load->model('extension/sticker');
+                $this->load->model('setting/setting');
+                $stickersetting = $this->model_setting_setting->getSetting('module_sticker', $this->config->get('config_store_id'));
+                $stickerstat = $stickersetting['module_sticker_status'];
+                $stickerproc = $stickersetting['module_sticker_productpros'];
+                $stickercache = $stickersetting['module_sticker_cache'];
+                //END
+                ]]>
+            </add>
+        </operation>
+
+        <operation error="skip">
+            <search><![CDATA[$data['thumb'] = $this->model_tool_image->resize($product_info['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_thumb_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_thumb_height'));]]></search>
+            <add position="replace"><![CDATA[
+                //UPS
+                if ($stickerstat) {
+                    $sticker = $this->model_extension_sticker->getSticker($product_info['product_id']);
+                    if (!empty($sticker)) {
+                      $resImage = new Sticker($product_info['image'], $sticker, $this->config->get('theme_' . $this->config->get('config_theme') . '_image_thumb_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_thumb_height'), $this->config->get('config_store_id'));
+                      $resImage->setScale($stickerproc);
+                      $resImage->setCacheImage($stickercache);
+                      $data['thumb'] = ($this->request->server['HTTPS'] ? $this->config->get('config_ssl') : $this->config->get('config_url')) . $resImage->merge();
+                    } else {
+                      $data['thumb'] = $this->model_tool_image->resize($product_info['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_thumb_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_thumb_height'));
+                    }
+                 } else {
+                    $data['thumb'] = $this->model_tool_image->resize($product_info['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_thumb_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_thumb_height'));
+
+                }
+                //END
+                ]]>
+            </add>
+        </operation>
+        <operation error="skip">
+            <search><![CDATA[$image = $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_related_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_related_height'));]]></search>
+            <add position="replace"><![CDATA[
+                //UPS
+                $stickerproc = $stickersetting['module_sticker_productexpros'];
+                $stickercache = $stickersetting['module_sticker_cache'];
+
+                if ($stickerstat) {
+                    $sticker = $this->model_extension_sticker->getSticker($result['product_id']);
+                    if (!empty($sticker)) {
+                      $resImage = new Sticker($result['image'], $sticker, $this->config->get('theme_' . $this->config->get('config_theme') . '_image_related_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_related_height'), $this->config->get('config_store_id'));
+                      $resImage->setScale($stickerproc);
+                      $resImage->setCacheImage($stickercache);
+                      $image = ($this->request->server['HTTPS'] ? $this->config->get('config_ssl') : $this->config->get('config_url')) . $resImage->merge();
+                    } else {
+                        $image = $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_related_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_related_height'));
+                    }
+                 } else {
+                    $image = $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_related_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_related_height'));
+                }
+                //END
+                ]]>
+            </add>
+        </operation>
+    </file>
+    <file path="admin/controller/extension/extension/module.php">
+      <operation error="skip">
+          <search><![CDATA[public function install() {]]></search>
+          <add position="after"><![CDATA[
+            //UPS
+        		if ($this->request->get['extension'] == 'sticker') {
+        				$this->load->model('extension/sticker');
+        				$this->model_extension_sticker->install();
+        		}
+        		//
+            ]]>
+          </add>
+      </operation>
+      <operation error="skip">
+          <search><![CDATA[public function uninstall() {]]></search>
+          <add position="after"><![CDATA[
+            //UPS
+        		if ($this->request->get['extension'] == 'sticker') {
+        				$this->load->model('extension/sticker');
+        				$this->model_extension_sticker->uninstall();
+        		}
+        		//
+            ]]>
+          </add>
+      </operation>
+    </file>
+
+</modification>
